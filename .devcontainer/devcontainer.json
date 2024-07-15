@@ -9,5 +9,22 @@
   	"postCreateCommand": {
 		"gitConfig": "git config --global --add safe.directory ${containerWorkspaceFolder}",
 		"customTerminal": "sed -i 's/ZSH_THEME=.*/ZSH_THEME='agnoster'/g' ~/.zshrc",
-	}
+		"install": "npm install"
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+        "eamodio.gitlens",
+        "Angular.ng-template"
+      ],
+			"settings": {
+				"terminal.integrated.defaultProfile.linux": "zsh",
+				"terminal.integrated.profiles.linux": {
+					"zsh": {
+						"path": "/bin/zsh"
+					},
+				}
+			}
+		}
+	},
 }
