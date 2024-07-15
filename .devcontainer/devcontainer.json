@@ -1,0 +1,13 @@
+{
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:22",
+  "features": {
+    "ghcr.io/devcontainers-contrib/features/angular-cli:2": {},
+    		"ghcr.io/stuartleeks/dev-container-features/shell-history:0": {},
+		"ghcr.io/devcontainers-contrib/features/zsh-plugins:0": {}
+
+  },
+  	"postCreateCommand": {
+		"gitConfig": "git config --global --add safe.directory ${containerWorkspaceFolder}",
+		"customTerminal": "sed -i 's/ZSH_THEME=.*/ZSH_THEME='agnoster'/g' ~/.zshrc",
+	}
+}
