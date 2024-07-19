@@ -1,0 +1,12 @@
+<div class="flex flex-col items-center justify-center h-full prose m-auto max-w-xs">
+        <h1 >Bienvenue !</h1> 
+        
+        <select [(ngModel)]="selectedUser" class="select select-primary w-full" aria-label="Sélectionner un utilisateur">
+            <option disabled selected hidden [value]="0">Sélectionner un utilisateur...</option>
+            @for (user of usersList; track $index) {
+                <option [ngValue]="user" >{{user.label}}</option>
+            }
+        </select>
+
+        <button type="submit" class="btn btn-primary w-full m-4" [disabled]="this.selectedUser==0" (click)="login()">Login</button>
+</div>
