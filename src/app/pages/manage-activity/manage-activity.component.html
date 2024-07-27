@@ -1,1 +1,7 @@
 <p>manage-activity works!</p>
+<smart-scheduler #scheduler id="scheduler" [dataSource]="dataSource" [view]="view" [views]="views"
+    [nonworkingDays]="nonworkingDays" [dataSource]="dataSource" [firstDayOfWeek]="firstDayOfWeek"
+    [disableDateMenu]="disableDateMenu" [currentTimeIndicator]="currentTimeIndicator" (onDragEnd)="updateData($event)"
+    (onResizeEnd)="updateData($event)" (onItemUpdate)="updateData($event)" (onItemRemove)="updateData($event)"
+    (onDateChange)="handleDateChange($event)">
+</smart-scheduler>

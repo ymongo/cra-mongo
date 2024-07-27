@@ -1,7 +1,12 @@
+import { User } from "./user"
+
 export interface Activity{
-    month: Date,
-    year: Date,
-    dailyActivties: Array<DailyActivity>
+    id: number,
+    user: User
+    label: string,
+    activityType: ActivityType,
+    dateStart: Date,
+    dateEnd: Date,
 }
 
 export interface DailyActivity {

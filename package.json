@@ -18,9 +18,11 @@
     "@angular/platform-browser": "^18.1.0",
     "@angular/platform-browser-dynamic": "^18.1.0",
     "@angular/router": "^18.1.0",
+    "@mobiscroll/angular": "npm:@mobiscroll/angular-ivy-trial@^5.31.2",
     "@ngrx/effects": "^18.0.1",
     "@ngrx/store": "^18.0.1",
     "rxjs": "~7.8.0",
+    "smart-webcomponents-angular": "^19.1.30",
     "tslib": "^2.3.0",
     "zone.js": "~0.14.3"
   },

@@ -1,0 +1,10 @@
+<p>activity works!</p>
+<div class="my-2 mx-6 h-250 h-screen">
+    <smart-scheduler class="my-2 mx-6" #scheduler id="scheduler" [dataSource]="dataSource" [view]="view" 
+   [dataSource]="dataSource" [firstDayOfWeek]="firstDayOfWeek"
+   (onItemInsert)="insertItem($event)"
+     (onItemUpdate)="updateData($event)" (onItemRemove)="updateData($event)"
+    (onDateChange)="handleDateChange($event)" 
+    (onEditDialogOpen)="handleEditDialogOpen($event)"/>
+</div>
+<!-- [windowCustomizationFunction]="windowCustomizationFunction" [views]="views" [currentTimeIndicator]="currentTimeIndicator" [disableDateMenu]="disableDateMenu" -->

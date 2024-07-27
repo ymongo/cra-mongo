@@ -21,7 +21,7 @@ export class LoginComponent implements OnInit {
     private store: Store<UserState>
   ){}
   usersList:Array<User> = []
-  selectedUser : User|number = 0
+  selectedUser : User|number = 99
   
   ngOnInit() {
     this.usersList=  this.loginService.getUsers()

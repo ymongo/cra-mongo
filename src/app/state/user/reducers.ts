@@ -3,15 +3,17 @@ import { User } from '@models/user';
 import { UserActions } from './actions';
 
 export interface UserState {
-    user: User | null
+    user: User
 }
 
-const initialState: UserState = {
-    user : null
-}
+const initialState: UserState = {} as UserState
+
 
 export const userReducer = createReducer(initialState,
-    on(UserActions.login, (state, action) =>({...state,...action.user})),
+    on(UserActions.login, (state, {user}): UserState => {
+        return  {...state,...user}
+    }
+    ),
     on(UserActions.loginSuccess, (state) => ({ ...state })),
     on(UserActions.loginFailure, (state, { error }) => ({ ...state, error })),
     on(UserActions.logoutSuccess, (state) => ({ ...state })),

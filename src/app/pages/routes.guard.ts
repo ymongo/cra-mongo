@@ -1,6 +1,6 @@
 import { inject, Injectable } from "@angular/core";
-import { CanMatchFn, } from "@angular/router";
-import { Role } from "@models/user";
+import { CanActivateFn, CanMatchFn, Router, } from "@angular/router";
+import { Role, User } from "@models/user";
 import { Store } from "@ngrx/store";
 import { UserState } from "@state/user/reducers";
 import { map, Observable, take } from "rxjs";
@@ -10,21 +10,28 @@ import { map, Observable, take } from "rxjs";
     providedIn: 'root'
 })
 export class PagesGuard {
-    user$
+    user$: Observable<User>
 
     constructor(
         private store: Store<UserState>,
+        private router: Router,
+
     ) {
-        this.user$ = this.store.select(state => state.user)
+        this.user$ = this.store.select((state) => state.user)
     }
 
-    private isUserLoggedInAndRole(role: Role): Observable<boolean> {
+    private isUserLoggedInAndRole(role: Role | null = null): Observable<boolean> {
         return this.user$.pipe(
             map(user => {
-                if (user && user.role == role) {
-                    return true
+                if (Object.keys(user).length) {
+                    if (user.role === role) {
+                        return true
+                    }
+                    return false
+                } else {
+                    this.router.navigate([''])
+                    return false
                 }
-                return false
             }),
             take(1)
         )
@@ -40,10 +47,12 @@ export class PagesGuard {
 }
 
 
-export const canMatchAgentActivityPage: CanMatchFn = () => {
+export const canActivateAgentActivityPage: CanMatchFn = () => {
+    console.log("ohé isAgent", Role.AGENT)
     return inject(PagesGuard).isAgent()
 }
 
-export const canMatchManagertActivityPage: CanMatchFn = () => {
+export const canActivateManagertActivityPage: CanActivateFn = () => {
+    console.log("ohé isManager ", Role.MANAGER)
     return inject(PagesGuard).isManager()
 }
