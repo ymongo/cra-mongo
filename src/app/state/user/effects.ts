@@ -7,20 +7,25 @@ import { Role } from '@models/user';
 
 @Injectable()
 export class UserEffects {
-    navigateToRoot$
+    navigateToActivity$
+    navigateToLogin$
 
     constructor(
         private actions$: Actions,
         private router: Router
     ) {
-        this.navigateToRoot$ = createEffect(() => this.actions$.pipe(
+        this.navigateToActivity$ = createEffect(() => this.actions$.pipe(
             ofType(UserActions.login),
-            tap(({user}) => {
-                if (user.role==Role.AGENT) {
-                    this.router.navigate(['activity'])
-                } else {
-                    this.router.navigate(['activity'])
-                }
+            tap(() => {
+                this.router.navigate(['activity'])
+            })
+        ), { dispatch: false });
+
+        this.navigateToLogin$ = createEffect(() => this.actions$.pipe(
+            ofType(UserActions.logout),
+            tap(() => {
+                this.router.navigate(['login'])
+
             })
         ), { dispatch: false });
     }

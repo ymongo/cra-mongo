@@ -10,6 +10,9 @@
       "@state/*":[
         "./src/app/state/*"
       ],
+      "@shared/*":[
+        "./src/app/shared/*"
+      ],
     },
     "outDir": "./dist/out-tsc",
     "strict": true,

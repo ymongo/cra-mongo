@@ -1,66 +1,98 @@
-import { Component } from '@angular/core';
-import { SchedulerModule, SchedulerViewType } from 'smart-webcomponents-angular/scheduler';
+import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { localeFr, MbscCalendarEvent, MbscEventcalendarOptions, MbscModule, Notifications, setOptions } from '@mobiscroll/angular';
+import { User } from '@models/user';
+import { Store } from '@ngrx/store';
+import { mapActivityToEvent } from '@shared/activity-utils';
+import { ActivityActions } from '@state/activity/actions';
+import { selectManagerActivityFeature, selectUserFeature } from '@state/selectors';
+import { map, Observable, take } from 'rxjs';
+
+setOptions({
+  locale: localeFr,
+  theme: 'ios',
+  themeVariant: 'light',
+});
 
 @Component({
   selector: 'app-manage-activity',
   standalone: true,
-  imports: [SchedulerModule],
+  imports: [MbscModule, FormsModule, CommonModule, ReactiveFormsModule],
   templateUrl: './manage-activity.component.html',
   styleUrl: './manage-activity.component.scss'
 })
-export class ManageActivityComponent {
-  handleCalendarChange(event: Event) {
-    console.log("event: ", event)
-  }
-  view: SchedulerViewType = 'month';
-  views: any[] = ['day',
-    {
-      type: 'month',
-      hideWeekend: true,
-    }, 'agenda',
-  ];
-  today = new Date();
-  firstDayOfWeek: number = 1;
+export class ManageActivityComponent implements OnInit {
+  user!: User;
 
-  disableDateMenu: boolean = true;
+  constructor(
+    private store: Store,
+    private notify: Notifications,
+  ) { }
 
-  currentTimeIndicator: boolean = true;
-  nonworkingDays: number[] = this.getPastThreeWeekdays(this.today.getDay());
-  
-  getPastThreeWeekdays(weekday: number) {
-    let weekdays = [];
+  events$!: Observable<MbscCalendarEvent[]>;
+  calendarSelectedDate: any = new Date();
 
-    for (let i = 0; i < 3; i++) {
-      weekdays.push((weekday - i + 7) % 7);
-    }
-
-    return weekdays;
-  }
-  dataSource = (() => {
-    const currentDate = this.today.getDate(),
-      currentYear = this.today.getFullYear(),
-      currentMonth = this.today.getMonth();
-    return [
-      {
-        label: 'Brochure Design Review',
-        dateStart: new Date(currentYear, currentMonth, 10, 13, 15),
-        dateEnd: new Date(currentYear, currentMonth, 12, 16, 15),
-        status: 'tentative',
-        class: 'event'
-      }, {
-        label: 'Website Re-Design Plan',
-        dateStart: new Date(currentYear, currentMonth, 16, 16, 45),
-        dateEnd: new Date(currentYear, currentMonth, 18, 11, 15),
-        class: 'event'
+  eventSettings: MbscEventcalendarOptions = {
+    clickToCreate: false,
+    dragToCreate: false,
+    dragToMove: false,
+    dragToResize: false,
+    eventDelete: false,
+    eventOverlap: false,
+    view: {
+      calendar: {
+        type: 'month',
+        popover: true,
+        labels: true,
+        count: false,
+      },
+    },
+    invalid: [{
+      recurring: {
+        repeat: 'weekly',
+        weekDays: 'SA,SU'
       }
-    ]
-  })()
+    }],
+    extendDefaultEvent: (args) => {
+      return {
+        activityType: 0,
+        user: undefined
+      };
+    }
+  };
 
-  handleDateChange(event: Event) {
-    console.log(event)
+  ngOnInit(): void {
+    this.events$ = this.store.select(selectManagerActivityFeature).pipe(
+      map(activityData => {
+        return activityData.map(a => {
+          const event = mapActivityToEvent(a)
+          this.setColorevent(event)
+          return event
+        })
+      }
+      ))
+    this.store.select(selectUserFeature).pipe(take(1)).subscribe(
+      (user) => {
+        this.user = user
+      }
+    )
+    this.store.dispatch(ActivityActions.load())
   }
 
-  updateData(event: Event) {
-    console.log(event)
+  setColorevent(event: MbscCalendarEvent) {
+    switch (event['user'].id) {
+      case 'agent_1':
+        event.color = 'yellow'
+        break
+      case 'agent_2':
+        event.color = 'pink'
+        break
+      case 'agent_3':
+        event.color = 'orange'
+        break
+    }
   }
+
+
 }

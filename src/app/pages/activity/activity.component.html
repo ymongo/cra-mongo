@@ -1,10 +1,22 @@
-<p>activity works!</p>
-<div class="my-2 mx-6 h-250 h-screen">
-    <smart-scheduler class="my-2 mx-6" #scheduler id="scheduler" [dataSource]="dataSource" [view]="view" 
-   [dataSource]="dataSource" [firstDayOfWeek]="firstDayOfWeek"
-   (onItemInsert)="insertItem($event)"
-     (onItemUpdate)="updateData($event)" (onItemRemove)="updateData($event)"
-    (onDateChange)="handleDateChange($event)" 
-    (onEditDialogOpen)="handleEditDialogOpen($event)"/>
+<div class="flex flex-col prose items-center justify-center  mx-auto my-6">
+    <span class="text-xl">Vue Agent: {{user.label}}</span>
 </div>
-<!-- [windowCustomizationFunction]="windowCustomizationFunction" [views]="views" [currentTimeIndicator]="currentTimeIndicator" [disableDateMenu]="disableDateMenu" -->
+
+<mbsc-eventcalendar dataTimezone="utc" [data]="(myEvents$| async) || []"
+    [options]="eventSettings" [(selectedDate)]="calendarSelectedDate"></mbsc-eventcalendar>
+<mbsc-popup [options]="popupOptions" [anchor]="popupAnchor" [buttons]="popupButtons" [headerText]="popupHeaderText"
+    #editEventPopup>
+    <div class="mbsc-form-group">
+        <mbsc-select [data]="activityOptions" display="anchored" [itemHeight]="64" label="Activité" labelStyle="stacked"
+            inputStyle="box" placeholder="Sélectionner une activité" [(ngModel)]="popupActivity"></mbsc-select>
+
+        <div class="mbsc-button-group">
+            <mbsc-button class="mbsc-button-block" color="primary" (click)="saveEvent()">Enregistrer</mbsc-button>
+            @if (isEdit) {
+            <mbsc-button class="mbsc-button-block" color="danger" variant="outline"
+                (click)="deleteEvent()">Supprimer</mbsc-button>
+            }
+
+        </div>
+    </div>
+</mbsc-popup>

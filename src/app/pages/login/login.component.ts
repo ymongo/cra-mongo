@@ -1,11 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { User } from '@models/user';
-import { LoginService } from '../services/login.service';
 import { FormsModule } from '@angular/forms';
-import { UserActions } from '../../../state/user/actions';
+import { User, USERS } from '@models/user';
 import { Store } from '@ngrx/store';
-import { Observable, of } from 'rxjs';
 import { UserState } from '@state/user/reducers';
+import { UserActions } from '../../state/user/actions';
 
 @Component({
   selector: 'app-login',
@@ -17,19 +15,16 @@ import { UserState } from '@state/user/reducers';
 export class LoginComponent implements OnInit {
 
   constructor(
-    private loginService: LoginService,
     private store: Store<UserState>
   ){}
   usersList:Array<User> = []
   selectedUser : User|number = 99
   
   ngOnInit() {
-    this.usersList=  this.loginService.getUsers()
+    this.usersList = USERS
   }
 
   login() {
-    console.log("ho", this.selectedUser)
-
     this.store.dispatch(UserActions.login({user: this.selectedUser as User}));
   }
 

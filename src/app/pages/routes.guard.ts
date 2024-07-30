@@ -2,6 +2,7 @@ import { inject, Injectable } from "@angular/core";
 import { CanActivateFn, CanMatchFn, Router, } from "@angular/router";
 import { Role, User } from "@models/user";
 import { Store } from "@ngrx/store";
+import { selectUserFeature } from "@state/selectors";
 import { UserState } from "@state/user/reducers";
 import { map, Observable, take } from "rxjs";
 
@@ -17,13 +18,13 @@ export class PagesGuard {
         private router: Router,
 
     ) {
-        this.user$ = this.store.select((state) => state.user)
+        this.user$ = this.store.select(selectUserFeature)
     }
 
     private isUserLoggedInAndRole(role: Role | null = null): Observable<boolean> {
         return this.user$.pipe(
             map(user => {
-                if (Object.keys(user).length) {
+                if (user && Object.keys(user).length) {
                     if (user.role === role) {
                         return true
                     }
@@ -48,11 +49,9 @@ export class PagesGuard {
 
 
 export const canActivateAgentActivityPage: CanMatchFn = () => {
-    console.log("ohé isAgent", Role.AGENT)
     return inject(PagesGuard).isAgent()
 }
 
 export const canActivateManagertActivityPage: CanActivateFn = () => {
-    console.log("ohé isManager ", Role.MANAGER)
     return inject(PagesGuard).isManager()
 }

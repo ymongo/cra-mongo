@@ -1,155 +1,221 @@
-import { Component, ViewChild } from '@angular/core';
-import { Rating } from 'smart-webcomponents-angular';
-import { SchedulerComponent, SchedulerModule, SchedulerViewType } from 'smart-webcomponents-angular/scheduler';
-import { DropDownListComponent, DropDownListModule } from 'smart-webcomponents-angular/dropdownlist';
+import { CommonModule } from '@angular/common';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { localeFr, MbscCalendarEvent, MbscEventcalendarOptions, MbscModule, MbscPopup, MbscPopupOptions, Notifications, setOptions } from '@mobiscroll/angular';
+import { Activity, ActivityType } from '@models/activity';
+import { User } from '@models/user';
+import { Store } from '@ngrx/store';
+import { ActivityActions } from '@state/activity/actions';
+import { selectUserActivityFeature, selectUserFeature } from '@state/selectors';
+import { map, Observable, take, tap } from 'rxjs';
+
+setOptions({
+  locale: localeFr,
+  theme: 'ios',
+  themeVariant: 'light',
+});
 
 @Component({
   selector: 'app-activity',
   standalone: true,
-  imports: [SchedulerModule, DropDownListModule],
+  imports: [MbscModule, FormsModule, CommonModule, ReactiveFormsModule,
+  ],
+  providers: [Notifications],
   templateUrl: './activity.component.html',
   styleUrl: './activity.component.scss'
 })
-export class ActivityComponent {
-  @ViewChild('scheduler', { read: SchedulerComponent, static: false }) scheduler!: SchedulerComponent;
+export class ActivityComponent implements OnInit {
+  constructor(
+    private store: Store,
+    private notify: Notifications,
+  ) { }
+  @ViewChild('editEventPopup', { static: false })
+  editEventPopup!: MbscPopup;
 
-  view: SchedulerViewType = 'month';
-  // views: any[] = [
-  //   {
-  //     type: 'month',
-  //     hideWeekend: true,
-  //   }
-  // ];
-  today = new Date();
-  firstDayOfWeek: number = 1;
+  tempEvent!: MbscCalendarEvent;
+  isEdit: boolean = false;
+  dayOffCount: number = 0
+  user: User = {} as User;
 
-  disableDateMenu: boolean = false;
+  popupEventTitle: string | undefined
+  popupAnchor: HTMLElement | undefined;
+  popupHeaderText: string = "Editer activité";
+  popupEventDates: any = []
+  popupActivity: any | number = 0
+  activityOptions = [
+    {
+      text: 'Mission 1',
+      value: ActivityType.MISSION1
+    },
+    {
+      text: 'Mission 2',
+      value: ActivityType.MISSION2
+    },
+    {
+      text: 'Mission 3',
+      value: ActivityType.MISSION3
+    },
+    {
+      text: 'Congé',
+      value: ActivityType.DAY_OFF
+    },
+  ];
 
-  currentTimeIndicator: boolean = true;
+  calendarSelectedDate: any = new Date();
 
-  dataSource = (() => {
-    const currentDate = this.today.getDate(),
-      currentYear = this.today.getFullYear(),
-      currentMonth = this.today.getMonth();
-    return [
-      {
-        label: 'Brochure Design Review',
-        dateStart: new Date(currentYear, currentMonth, 10, 13, 15),
-        dateEnd: new Date(currentYear, currentMonth, 12, 16, 15),
-        status: 'tentative',
-        class: 'event',
-        activity: "0"
-      }, {
-        label: 'Website Re-Design Plan',
-        dateStart: new Date(currentYear, currentMonth, 16, 16, 45),
-        dateEnd: new Date(currentYear, currentMonth, 18, 11, 15),
-        class: 'event',
-        activity: "2"
-
-      }
-    ]
-  })()
-  insertItem(event: CustomEvent) {
-    // event.detail.item[]
-    console.log(event)
-  }
-
-
-  handleDateChange(event: Event) {
-    console.log(event)
-  }
-
-  updateData(event: Event) {
-    console.log("updated, lets see", event)
-  }
-
-  windowCustomizationFunction() {
-
-  }
-
-  handleActivityChange(event: CustomEvent, bgColorElem: any, labelElem: any) {
-    console.log("option changed", event)
-    console.log("color picker", bgColorElem)
-    const detail = event?.detail
-    if (detail?.selected && detail?.value) {
-      switch (detail.value) {
-        case "0":
-          bgColorElem.querySelector('[event-editor]').value = "#F6BF26"
-          break
-        case "1":
-          bgColorElem.querySelector('[event-editor]').value = "#E67C73"
-          break
-        case "2":
-          bgColorElem.querySelector('[event-editor]').value = "#F4511E"
-          break
-      }
-      labelElem.querySelector('[event-editor]').value = detail.label
-
+  popupButtons: any = [
+    {
+      handler: () => {
+        this.editEventPopup.close();
+      },
+      keyCode: 'Esc',
+      text: 'X',
+      cssClass: 'mbsc-popup-button-primary',
     }
-  }
-
-  handleEditDialogOpen(event: CustomEvent) {
-    const scheduler = this.scheduler,
-      editors = event.detail.editors;
-    console.log("editor detail", event)
-    if (!editors) {
-      return;
-    }
-
-    const schedulerEvent = event.detail.item,
-      allDayEditor = editors.allDay,
-      backgroundColorEditor = editors.backgroundColor,
-      labelEditor = editors.label,
-
-      editorsContainer = editors.description.parentElement;
-
-    allDayEditor.querySelector('[event-editor]').checked = true
-    allDayEditor.querySelector('[event-editor]').disabled = true
-
-    const unusedElems = ['allDay', 'label', 'repeat', 'description', 'notifications', 'conference', 'status']
-    for (let item of unusedElems) {
-      editors[item].classList.add('smart-hidden')
-    }
-
-    let activityElement = editorsContainer.querySelector('#eventActivity');
-
-    if (!activityElement) {
-      const elementContainer = document.createElement('div'),
-        label = document.createElement('label');
-
-      label.textContent = 'Activité: ';
-      elementContainer.classList.add('smart-scheduler-window-editor');
-
-      elementContainer.appendChild(label);
-
-      activityElement = document.createElement('smart-drop-down-list');
-      elementContainer.setAttribute('type', 'activity')
-      activityElement.addEventListener('change', ($event: CustomEvent) => this.handleActivityChange($event, backgroundColorEditor, labelEditor));
-      activityElement.id = 'eventActivity';
-
-      const activityList = [{ label: 'Mission 1', value: "0" }, { label: 'Mission 2', value: "1" }, { label: 'Mission 3', value: "2" }]
-      for (let item of activityList) {
-        const activityItem = document.createElement('smart-list-item')
-        activityItem.setAttribute('value', item.value)
-        activityItem.append(item.label)
-        activityElement.append(activityItem)
-      }
-      elementContainer.append(activityElement);
-      editorsContainer.prepend(elementContainer);
-    } 
-    console.log("schedulerevent", schedulerEvent)
-    if (schedulerEvent.activity){
-      activityElement.value = schedulerEvent.activity
-    } else {
-      activityElement.clearSelection()
-    }
-    activityElement.value = schedulerEvent.activity? schedulerEvent.activity : undefined
-
+  ];
   
+  myEvents$!: Observable<MbscCalendarEvent[]>;
 
+  eventSettings: MbscEventcalendarOptions = {
+    clickToCreate: 'double',
+    dragToCreate: false,
+    dragToMove: false,
+    dragToResize: false,
+    eventDelete: true,
+    eventOverlap: false,
+    view: {
+      calendar: {
+        type: 'month',
+        popover: false,
+        labels: true,
+        count: false,
+      },
+      agenda: { type: 'month' },
+    },
+    invalid: [{
+      recurring: {
+        repeat: 'weekly',
+        weekDays: 'SA,SU'
+      }
+    }],
+    onEventClick: (args) => {
+      this.editOrCreateEvent(true, args.event, args.domEvent.currentTarget)
+    },
+    onEventCreated: (args) => {
+      setTimeout(() => {
+        this.editOrCreateEvent(false, args.event, args.target)
+      });
+    },
+    extendDefaultEvent: (args) => {
+      return {
+        activityType: 99
+      };
+    }
+  };
 
-    // activityElement.value = schedulerEvent.activity || null;
+  editOrCreateEvent(isEdit: boolean, event: MbscCalendarEvent, target: any) {
+    this.isEdit = isEdit;
+    console.log("event", event)
+    this.popupActivity = event['activityType']
+    this.tempEvent = event;
+    this.popupEventDates = [event.start, event.end];
+    this.popupAnchor = target;
+
+    this.editEventPopup.open();
   }
 
+  popupOptions: MbscPopupOptions = {
+    display: 'bottom',
+    contentPadding: false,
+    fullScreen: true,
+    responsive: {
+      medium: {
+        display: 'anchored',
+        width: 400,
+        fullScreen: false,
+        touchUi: false,
+      },
+    },
+  };
 
+  ngOnInit(): void {
+    this.myEvents$ = this.store.select(selectUserActivityFeature).pipe(
+      tap(activityData => this.getDayOffCount(activityData)),
+      map(activityData => {
+        return activityData.map(a => this.mapActivityToEvent(a))
+      }
+      ))
+    this.store.select(selectUserFeature).pipe(take(1)).subscribe(
+      (user) => {
+        this.user = user
+      }
+    )
+    this.store.dispatch(ActivityActions.load())
+  }
+
+  getDayOffCount(activities: Array<Activity>) {
+    this.dayOffCount = activities.filter(a => a.activityType === ActivityType.DAY_OFF).length
+  }
+
+  mapActivityToEvent(activity: Activity): MbscCalendarEvent {
+    return {
+      id: activity.id,
+      title: activity.label,
+      start: activity.dateStart,
+      end: activity.dateEnd,
+
+      allDay: true,
+      activityType: activity.activityType
+    }
+  }
+
+  getActivityOptionFromEvent() {
+    return this.activityOptions.find(d => d.value == this.popupActivity)!
+  }
+
+  mapEventToActivity(event: MbscCalendarEvent): Activity {
+    return {
+      user: this.user,
+      id: event.id!.toString(),
+      label: event.title!,
+      activityType: this.getActivityOptionFromEvent()?.value || 0,
+      dateStart: event.start as Date,
+      dateEnd: event.end as Date,
+    };
+  }
+
+  hasRemainingDaysOff(activity: Activity) {
+    if (activity.activityType === ActivityType.DAY_OFF && this.dayOffCount === 5) {
+      return false
+    }
+    return true
+  }
+
+  saveEvent(): void | false {
+    this.tempEvent.title = this.getActivityOptionFromEvent().text;
+    this.tempEvent.start = this.popupEventDates[0];
+    this.tempEvent.end = this.popupEventDates[1];
+    this.tempEvent.allDay = true
+    const activityData = this.mapEventToActivity(this.tempEvent)
+    if (!this.hasRemainingDaysOff(activityData)) {
+      this.notify.toast({
+        message: "Jours de congé épuisés",
+      });
+      return false
+    }
+    if (this.isEdit) {
+      this.store.dispatch(ActivityActions.update({ user: this.user, activity: activityData }));
+    } else {
+      this.store.dispatch(ActivityActions.create({ user: this.user, activity: activityData }));
+    }
+    this.calendarSelectedDate = this.popupEventDates[0];
+    this.editEventPopup.close();
+  }
+
+  deleteEvent() {
+    const activityData = this.mapEventToActivity(this.tempEvent)
+    this.store.dispatch(ActivityActions.delete({ user: this.user, activity: activityData }));
+    this.editEventPopup.close();
+
+  }
 }

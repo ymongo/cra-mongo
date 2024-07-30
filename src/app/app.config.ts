@@ -7,6 +7,8 @@ import { provideState, provideStore } from '@ngrx/store';
 import { userReducer } from '@state/user/reducers';
 import { provideEffects } from '@ngrx/effects';
 import { UserEffects } from '@state/user/effects';
+import { activityReducer } from '@state/activity/reducers';
+import * as activityEffects from '@state/activity/effects' ;
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -15,6 +17,9 @@ export const appConfig: ApplicationConfig = {
     provideAnimationsAsync(),
     provideStore(),
     provideState('user', userReducer),
+    provideState('activity', activityReducer),
+    provideEffects(activityEffects.ActivityEffects),
+
     provideEffects(UserEffects)
 ]
 };

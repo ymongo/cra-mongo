@@ -6,14 +6,14 @@ export const routes: Routes = [
 
     {
         path: "login",
-        loadComponent: () => import('./pages/login/components/login.component')
+        loadComponent: () => import('./pages/login/login.component')
             .then((m) => m.LoginComponent),
     },
     {
         path: "activity",
         canMatch: [canActivateAgentActivityPage],
-        loadComponent: () => import('./pages/activity-new/activity-new.component')
-            .then((m) => m.ActivityNewComponent)
+        loadComponent: () => import('./pages/activity/activity.component')
+            .then((m) => m.ActivityComponent)
     },
     {
         path: "activity",
