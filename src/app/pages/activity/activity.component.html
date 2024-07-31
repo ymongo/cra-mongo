@@ -1,0 +1,22 @@
+<div class="flex flex-col prose items-center justify-center  mx-auto my-6">
+    <span class="text-xl">Vue Agent: {{user.label}}</span>
+</div>
+
+<mbsc-eventcalendar dataTimezone="utc" [data]="(myEvents$| async) || []"
+    [options]="eventSettings" [(selectedDate)]="calendarSelectedDate"></mbsc-eventcalendar>
+<mbsc-popup [options]="popupOptions" [anchor]="popupAnchor" [buttons]="popupButtons" [headerText]="popupHeaderText"
+    #editEventPopup>
+    <div class="mbsc-form-group">
+        <mbsc-select [data]="activityOptions" display="anchored" [itemHeight]="64" label="Activité" labelStyle="stacked"
+            inputStyle="box" placeholder="Sélectionner une activité" [(ngModel)]="popupActivity"></mbsc-select>
+
+        <div class="mbsc-button-group">
+            <mbsc-button class="mbsc-button-block" color="primary" (click)="saveEvent()">Enregistrer</mbsc-button>
+            @if (isEdit) {
+            <mbsc-button class="mbsc-button-block" color="danger" variant="outline"
+                (click)="deleteEvent()">Supprimer</mbsc-button>
+            }
+
+        </div>
+    </div>
+</mbsc-popup>
