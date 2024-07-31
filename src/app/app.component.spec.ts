@@ -1,29 +1,47 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Store } from '@ngrx/store';
+
+import { selectUserFeature } from '@state/selectors';
+import { of } from 'rxjs';
 import { AppComponent } from './app.component';
 
 describe('AppComponent', () => {
+  let component: AppComponent;
+  let fixture: ComponentFixture<AppComponent>;
+  let store: jest.Mocked<Store>;
+
   beforeEach(async () => {
+    const storeMock = {
+      select: jest.fn()
+    };
+
     await TestBed.configureTestingModule({
       imports: [AppComponent],
+      providers: [
+        { provide: Store, useValue: storeMock }
+      ],
     }).compileComponents();
+
+    fixture = TestBed.createComponent(AppComponent);
+    component = fixture.componentInstance;
+    store = TestBed.inject(Store)as jest.Mocked<Store>;
   });
 
   it('should create the app', () => {
-    const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
     expect(app).toBeTruthy();
   });
 
-  it(`should have the 'cra-mongo' title`, () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app.title).toEqual('cra-mongo');
-  });
+  it('should set user on ngOnInit', () => {
+    const mockUser = { id: 'agent_xxx', label: 'agent de test' }; 
+    // Given
+    store.select.mockReturnValue(of(mockUser));
 
-  it('should render title', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, cra-mongo');
+    // When
+    component.ngOnInit();
+
+    // Then
+    expect(component.user).toEqual(mockUser);
+    expect(store.select).toHaveBeenCalledWith(selectUserFeature);
   });
 });

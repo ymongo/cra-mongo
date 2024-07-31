@@ -5,6 +5,7 @@ import { localeFr, MbscCalendarEvent, MbscEventcalendarOptions, MbscModule, Mbsc
 import { Activity, ActivityType } from '@models/activity';
 import { User } from '@models/user';
 import { Store } from '@ngrx/store';
+import { mapActivityToEvent } from '@shared/activity-utils';
 import { ActivityActions } from '@state/activity/actions';
 import { selectUserActivityFeature, selectUserFeature } from '@state/selectors';
 import { map, Observable, take, tap } from 'rxjs';
@@ -115,7 +116,6 @@ export class ActivityComponent implements OnInit {
 
   editOrCreateEvent(isEdit: boolean, event: MbscCalendarEvent, target: any) {
     this.isEdit = isEdit;
-    console.log("event", event)
     this.popupActivity = event['activityType']
     this.tempEvent = event;
     this.popupEventDates = [event.start, event.end];
@@ -142,7 +142,7 @@ export class ActivityComponent implements OnInit {
     this.myEvents$ = this.store.select(selectUserActivityFeature).pipe(
       tap(activityData => this.getDayOffCount(activityData)),
       map(activityData => {
-        return activityData.map(a => this.mapActivityToEvent(a))
+        return activityData.map(a => mapActivityToEvent(a))
       }
       ))
     this.store.select(selectUserFeature).pipe(take(1)).subscribe(
@@ -157,17 +157,6 @@ export class ActivityComponent implements OnInit {
     this.dayOffCount = activities.filter(a => a.activityType === ActivityType.DAY_OFF).length
   }
 
-  mapActivityToEvent(activity: Activity): MbscCalendarEvent {
-    return {
-      id: activity.id,
-      title: activity.label,
-      start: activity.dateStart,
-      end: activity.dateEnd,
-
-      allDay: true,
-      activityType: activity.activityType
-    }
-  }
 
   getActivityOptionFromEvent() {
     return this.activityOptions.find(d => d.value == this.popupActivity)!
@@ -216,6 +205,5 @@ export class ActivityComponent implements OnInit {
     const activityData = this.mapEventToActivity(this.tempEvent)
     this.store.dispatch(ActivityActions.delete({ user: this.user, activity: activityData }));
     this.editEventPopup.close();
-
   }
 }

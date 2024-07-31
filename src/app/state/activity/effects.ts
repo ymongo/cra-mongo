@@ -1,9 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { ActivityActions } from './actions';
-import { Router } from '@angular/router';
 import { exhaustMap, map, of, tap } from 'rxjs';
-import { Role } from '@models/user';
 import { Activity } from '@models/activity';
 
 @Injectable()
@@ -15,14 +13,11 @@ export class ActivityEffects {
 
     constructor(
         private actions$: Actions,
-        private router: Router
     ) {
         this.createActivity$ = createEffect(() => this.actions$.pipe(
             ofType(ActivityActions.create),
             tap(({ activity }) => {
-                console.log("coucou storageee", activity)
                 const activities = jParseToActivityArray(localStorage.getItem('activities')!)
-                console.log("before stringify", activities, activity)
                 localStorage['activities'] = JSON.stringify([...activities || [], activity],stringifyDate)
             })
         ), { dispatch: false });
@@ -33,7 +28,6 @@ export class ActivityEffects {
                 const activities = jParseToActivityArray(localStorage.getItem('activities')!)
                 .filter(a => a.id !== activity.id)
                 localStorage['activities'] = JSON.stringify([...activities || [], activity],stringifyDate)
-                console.log("update", activity)
             })
         ), { dispatch: false });
 
@@ -43,7 +37,6 @@ export class ActivityEffects {
                 const activities = jParseToActivityArray(localStorage.getItem('activities')!)
                 .filter(a => a.id !== activity.id)
                 localStorage['activities'] = JSON.stringify([...activities],stringifyDate)
-                console.log("delete", activity)
             })
         ), { dispatch: false });
 
@@ -56,7 +49,6 @@ export class ActivityEffects {
                             .pipe(
                                 map((activities) => {
                                     if (activities !== null) {
-                                        console.log("all activities", activities)
                                         return ActivityActions.getAll({ activities })
                                     } else {
                                         return ActivityActions.getAll({ activities: [] })
@@ -65,8 +57,7 @@ export class ActivityEffects {
                             )
                     )
                 );
-            },
-            { functional: true }
+            }
         );
     }
 }
@@ -87,6 +78,5 @@ function stringifyDate(key: any, value: any): any {
  }
 
 function jParseToActivityArray(data: string) {
-    console.log("data to parse", data)
     return JSON.parse(data, parseDate) as Array<Activity>
 }

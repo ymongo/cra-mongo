@@ -28,6 +28,6 @@ export const USERS: Array<User> = [
     {
       id:"agent_3",
       role: Role.AGENT,
-      label:"Agent 3  - Hulk"
+      label:"Agent 3  - I. Hulk"
     }
   ]

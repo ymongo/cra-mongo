@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { localeFr, MbscCalendarEvent, MbscEventcalendarOptions, MbscModule, Notifications, setOptions } from '@mobiscroll/angular';
+import { localeFr, MbscCalendarEvent, MbscEventcalendarOptions, MbscModule, setOptions } from '@mobiscroll/angular';
 import { User } from '@models/user';
 import { Store } from '@ngrx/store';
 import { mapActivityToEvent } from '@shared/activity-utils';
@@ -27,7 +27,6 @@ export class ManageActivityComponent implements OnInit {
 
   constructor(
     private store: Store,
-    private notify: Notifications,
   ) { }
 
   events$!: Observable<MbscCalendarEvent[]>;

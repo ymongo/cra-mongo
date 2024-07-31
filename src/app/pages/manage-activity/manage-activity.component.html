@@ -2,8 +2,6 @@
     <span class="text-xl">Vue Manager: {{user.label}}</span>
 </div>
 
-
-
 <mbsc-eventcalendar [data]="(events$| async) || []" [options]="eventSettings" [(selectedDate)]="calendarSelectedDate"
     [eventContentTemplate]="eventTemplate" [labelTemplate]="labelTemplate"></mbsc-eventcalendar>
 

@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { LoginComponent } from './login.component';
+import { Store } from '@ngrx/store';
+import { storeMock } from '@shared/tests-utils';
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
@@ -8,7 +10,10 @@ describe('LoginComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [LoginComponent]
+      imports: [LoginComponent],
+      providers: [
+        { provide: Store, useValue: storeMock },
+      ],
     })
     .compileComponents();
 
@@ -20,4 +25,6 @@ describe('LoginComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  
 });
